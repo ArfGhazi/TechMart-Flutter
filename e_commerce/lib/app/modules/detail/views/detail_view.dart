@@ -27,19 +27,11 @@ class DetailView extends GetView<DetailController> {
       ),
 
       body: Obx(() {
-        if (controller.product.isEmpty) {
+        final product = controller.product.value;
+
+        if (product == null) {
           return const Center(child: Text('Product not found.'));
         }
-
-        final product = controller.product;
-
-        final name = product['name']?.toString() ?? 'Product';
-        final category = product['category']?.toString() ?? 'Other';
-        final description =
-            product['description']?.toString() ?? 'No description available.';
-        final imageUrl = product['imageUrl']?.toString() ?? '';
-        final price = (product['price'] as num?) ?? 0;
-        final rating = (product['rating'] as num?) ?? 0;
 
         return SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -51,7 +43,7 @@ class DetailView extends GetView<DetailController> {
                 borderRadius: BorderRadius.circular(20),
                 child: AspectRatio(
                   aspectRatio: 1.1,
-                  child: imageUrl.isEmpty
+                  child: product.imageUrl.isEmpty
                       ? Container(
                           color: Colors.grey.shade200,
                           child: const Icon(
@@ -60,7 +52,7 @@ class DetailView extends GetView<DetailController> {
                           ),
                         )
                       : Image.network(
-                          imageUrl,
+                          product.imageUrl,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
                             return Container(
@@ -79,7 +71,7 @@ class DetailView extends GetView<DetailController> {
 
               // CATEGORY
               Text(
-                category.toUpperCase(),
+                product.category.toUpperCase(),
                 style: const TextStyle(
                   color: Color(0xFF4F46E5),
                   fontWeight: FontWeight.bold,
@@ -89,9 +81,9 @@ class DetailView extends GetView<DetailController> {
 
               const SizedBox(height: 8),
 
-              // PRODUCT NAME
+              // PRODUCT TITLE
               Text(
-                name,
+                product.title,
                 style: const TextStyle(
                   fontSize: 25,
                   fontWeight: FontWeight.bold,
@@ -106,7 +98,7 @@ class DetailView extends GetView<DetailController> {
                   const Icon(Icons.star_rounded, color: Colors.amber),
                   const SizedBox(width: 5),
                   Text(
-                    rating.toStringAsFixed(1),
+                    product.rating.toStringAsFixed(1),
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -116,7 +108,7 @@ class DetailView extends GetView<DetailController> {
 
               // PRICE
               Text(
-                '\$${price.toStringAsFixed(2)}',
+                '\$${product.price.toStringAsFixed(2)}',
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -135,7 +127,9 @@ class DetailView extends GetView<DetailController> {
               const SizedBox(height: 8),
 
               Text(
-                description,
+                product.description.isEmpty
+                    ? 'No description available.'
+                    : product.description,
                 style: const TextStyle(fontSize: 14, height: 1.6),
               ),
 
@@ -185,6 +179,7 @@ class DetailView extends GetView<DetailController> {
                     onPressed: controller.decrementQuantity,
                     icon: const Icon(Icons.remove_circle_outline),
                   ),
+
                   Text(
                     '${controller.quantity.value}',
                     style: const TextStyle(
@@ -192,6 +187,7 @@ class DetailView extends GetView<DetailController> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+
                   IconButton(
                     onPressed: controller.incrementQuantity,
                     icon: const Icon(Icons.add_circle_outline),

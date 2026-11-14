@@ -1,98 +1,95 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../data/models/product_model.dart';
+import '../../cart/controllers/cart_controller.dart';
+import '../../wishlist/controllers/wishlist_controller.dart';
+
 class HomeController extends GetxController {
-  // REACTIVE STATE
-  final cartCount = 0.obs;
+  final CartController cartController = Get.find<CartController>();
+
+  final WishlistController wishlistController = Get.find<WishlistController>();
+
   final selectedCategory = 'Semua'.obs;
   final searchQuery = ''.obs;
   final isLoading = false.obs;
   final errorMessage = ''.obs;
 
-  // WISHLIST
-  final favoriteIds = <String>{}.obs;
-
-  // CATEGORY
   final categories = ['Semua', 'Running', 'Casual', 'Basketball', 'Lifestyle'];
 
-  // PRODUCT DATA
-  final products = <Map<String, dynamic>>[
-    {
-      'id': 'shoe-01',
-      'name': 'Nike Air Max',
-      'category': 'Running',
-      'price': 120.00,
-      'rating': 4.8,
-      'reviewCount': 120,
-      'imageUrl':
+  final List<ProductModel> products = [
+    ProductModel(
+      id: 'shoe-01',
+      title: 'Nike Air Max',
+      category: 'Running',
+      price: 120,
+      rating: 4.8,
+      imageUrl:
           'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600',
-      'description': 'Comfortable running shoes with modern design.',
-    },
-    {
-      'id': 'shoe-02',
-      'name': 'Adidas Ultraboost',
-      'category': 'Running',
-      'price': 150.00,
-      'rating': 4.9,
-      'reviewCount': 200,
-      'imageUrl':
+      description: 'Comfortable running shoes with modern design.',
+    ),
+    ProductModel(
+      id: 'shoe-02',
+      title: 'Adidas Ultraboost',
+      category: 'Running',
+      price: 150,
+      rating: 4.9,
+      imageUrl:
           'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=600',
-      'description': 'Lightweight shoes for everyday running.',
-    },
-    {
-      'id': 'shoe-03',
-      'name': 'Nike Air Force 1',
-      'category': 'Casual',
-      'price': 110.00,
-      'rating': 4.7,
-      'reviewCount': 150,
-      'imageUrl':
+      description: 'Lightweight shoes for everyday running.',
+    ),
+    ProductModel(
+      id: 'shoe-03',
+      title: 'Nike Air Force 1',
+      category: 'Casual',
+      price: 110,
+      rating: 4.7,
+      imageUrl:
           'https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=600',
-      'description': 'Classic casual shoes for daily activities.',
-    },
-    {
-      'id': 'shoe-04',
-      'name': 'Jordan Basketball',
-      'category': 'Basketball',
-      'price': 180.00,
-      'rating': 4.9,
-      'reviewCount': 300,
-      'imageUrl':
+      description: 'Classic casual shoes for daily activities.',
+    ),
+    ProductModel(
+      id: 'shoe-04',
+      title: 'Jordan Basketball',
+      category: 'Basketball',
+      price: 180,
+      rating: 4.9,
+      imageUrl:
           'https://images.unsplash.com/photo-1519861531473-9200262188bf?w=600',
-      'description': 'Basketball shoes designed for performance.',
-    },
-    {
-      'id': 'shoe-05',
-      'name': 'New Balance 574',
-      'category': 'Lifestyle',
-      'price': 95.00,
-      'rating': 4.6,
-      'reviewCount': 90,
-      'imageUrl':
+      description: 'Basketball shoes designed for performance.',
+    ),
+    ProductModel(
+      id: 'shoe-05',
+      title: 'New Balance 574',
+      category: 'Lifestyle',
+      price: 95,
+      rating: 4.6,
+      imageUrl:
           'https://images.unsplash.com/photo-1539185441755-769473a23570?w=600',
-      'description': 'Classic lifestyle sneakers with a comfortable fit.',
-    },
-    {
-      'id': 'shoe-06',
-      'name': 'Puma RS-X',
-      'category': 'Casual',
-      'price': 100.00,
-      'rating': 4.5,
-      'reviewCount': 80,
-      'imageUrl':
+      description: 'Classic lifestyle sneakers with a comfortable fit.',
+    ),
+    ProductModel(
+      id: 'shoe-06',
+      title: 'Puma RS-X',
+      category: 'Casual',
+      price: 100,
+      rating: 4.5,
+      imageUrl:
           'https://images.unsplash.com/photo-1495555961986-6d4c1ecb7be3?w=600',
-      'description': 'Modern sneakers with a bold design.',
-    },
+      description: 'Modern sneakers with a bold design.',
+    ),
   ];
 
-  // FILTER PRODUCTS
-  List<Map<String, dynamic>> get filteredProducts {
+  int get cartCount => cartController.totalItems;
+
+  int get wishlistCount => wishlistController.count;
+
+  List<ProductModel> get filteredProducts {
     return products.where((product) {
       final categoryMatch =
           selectedCategory.value == 'Semua' ||
-          product['category'] == selectedCategory.value;
+          product.category == selectedCategory.value;
 
-      final searchMatch = product['name'].toString().toLowerCase().contains(
+      final searchMatch = product.title.toLowerCase().contains(
         searchQuery.value.toLowerCase(),
       );
 
@@ -100,21 +97,18 @@ class HomeController extends GetxController {
     }).toList();
   }
 
-  // CHANGE CATEGORY
   void selectCategory(String category) {
     selectedCategory.value = category;
   }
 
   void changeCategory(String category) {
-    selectedCategory.value = category;
+    selectCategory(category);
   }
 
-  // SEARCH
   void updateSearch(String value) {
     searchQuery.value = value;
   }
 
-  // REFRESH PRODUCTS
   Future<void> fetchProducts() async {
     try {
       isLoading.value = true;
@@ -128,33 +122,26 @@ class HomeController extends GetxController {
     }
   }
 
-  // ADD TO CART
-  void addToCart(Map<String, dynamic> product) {
-    cartCount.value++;
-
-    Get.snackbar(
-      'Added to Cart',
-      '${product['name']} added to cart.',
-      snackPosition: SnackPosition.BOTTOM,
-    );
-  }
-
-  // CHECK FAVORITE
   bool isFavorite(String productId) {
-    return favoriteIds.contains(productId);
+    return wishlistController.isFavorite(productId);
   }
 
-  // TOGGLE FAVORITE
   void toggleFavorite(String productId) {
-    if (favoriteIds.contains(productId)) {
-      favoriteIds.remove(productId);
-    } else {
-      favoriteIds.add(productId);
+    ProductModel? selectedProduct;
+
+    for (final product in products) {
+      if (product.id == productId) {
+        selectedProduct = product;
+        break;
+      }
     }
+
+    if (selectedProduct == null) return;
+
+    wishlistController.toggleFavorite(selectedProduct);
   }
 
-  // OPEN DETAIL
-  void openDetail(Map<String, dynamic> product) {
-    Get.toNamed('/detail', arguments: product);
+  void openDetail(ProductModel product) {
+    Get.toNamed('/detail', arguments: product.toJson());
   }
 }

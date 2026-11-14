@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+// ignore_for_file: constant_identifier_names
+
 import '../modules/cart/bindings/cart_binding.dart';
 import '../modules/cart/views/cart_view.dart';
 import '../modules/checkout/bindings/checkout_binding.dart';

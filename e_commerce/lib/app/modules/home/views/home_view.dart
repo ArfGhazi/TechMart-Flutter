@@ -43,21 +43,21 @@ class HomeView extends GetView<HomeController> {
             icon: Icon(Get.isDarkMode ? Icons.light_mode : Icons.dark_mode),
           ),
 
-          // CART BUTTON
+          // WISHLIST BUTTON
           Obx(() {
+            final wishlistCount = controller.wishlistCount;
+
             return Stack(
               alignment: Alignment.center,
               children: [
                 IconButton(
+                  tooltip: 'Wishlist',
                   onPressed: () {
-                    Get.snackbar(
-                      'Shopping Cart',
-                      'You have ${controller.cartCount.value} items in your cart.',
-                    );
+                    Get.toNamed('/wishlist');
                   },
-                  icon: const Icon(Icons.shopping_bag_outlined),
+                  icon: const Icon(Icons.favorite_border_rounded),
                 ),
-                if (controller.cartCount.value > 0)
+                if (wishlistCount > 0)
                   Positioned(
                     right: 5,
                     top: 5,
@@ -68,7 +68,44 @@ class HomeView extends GetView<HomeController> {
                         shape: BoxShape.circle,
                       ),
                       child: Text(
-                        '${controller.cartCount.value}',
+                        '$wishlistCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          }),
+
+          // CART BUTTON
+          Obx(() {
+            final cartCount = controller.cartCount;
+
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                IconButton(
+                  onPressed: () {
+                    Get.toNamed('/cart');
+                  },
+                  icon: const Icon(Icons.shopping_bag_outlined),
+                ),
+                if (cartCount > 0)
+                  Positioned(
+                    right: 5,
+                    top: 5,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '$cartCount',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 10,
@@ -176,17 +213,20 @@ class HomeView extends GetView<HomeController> {
 
               // CATEGORY FILTER
               Obx(() {
+                final selectedCategory = controller.selectedCategory.value;
+
                 return SizedBox(
                   height: 42,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: controller.categories.length,
-                    separatorBuilder: (_, index) => const SizedBox(width: 8),
+                    separatorBuilder: (_, index) {
+                      return const SizedBox(width: 8);
+                    },
                     itemBuilder: (context, index) {
                       final category = controller.categories[index];
 
-                      final selected =
-                          controller.selectedCategory.value == category;
+                      final selected = selectedCategory == category;
 
                       return ChoiceChip(
                         label: Text(category),
@@ -270,34 +310,16 @@ class HomeView extends GetView<HomeController> {
                   itemBuilder: (context, index) {
                     final product = products[index];
 
-                    // READ PRODUCT DATA
-                    final productId = product['id']?.toString() ?? '';
-
-                    final productName =
-                        product['name']?.toString() ?? 'Unknown Product';
-
-                    final productCategory =
-                        product['category']?.toString() ?? 'Other';
-
-                    final productPrice = (product['price'] as num?) ?? 0;
-
-                    final productRating = (product['rating'] as num?) ?? 0;
-
-                    final productImage = product['imageUrl']?.toString() ?? '';
-
-                    // DEBUG
-                    debugPrint('PRODUCT: $product');
-                    debugPrint('PRODUCT NAME: $productName');
-                    debugPrint('PRODUCT IMAGE: $productImage');
-
                     return Obx(() {
+                      final isFavorite = controller.isFavorite(product.id);
+
                       return ProductCard(
-                        title: productName,
-                        category: productCategory,
-                        price: '\$${productPrice.toStringAsFixed(2)}',
-                        rating: productRating.toDouble(),
-                        imageUrl: productImage,
-                        isFavorite: controller.isFavorite(productId),
+                        title: product.title,
+                        category: product.category,
+                        price: '\$${product.price.toStringAsFixed(2)}',
+                        rating: product.rating,
+                        imageUrl: product.imageUrl,
+                        isFavorite: isFavorite,
 
                         // OPEN DETAIL
                         onTap: () {
@@ -306,12 +328,16 @@ class HomeView extends GetView<HomeController> {
 
                         // ADD TO CART
                         onAddToCart: () {
-                          controller.addToCart(product);
+                          controller.cartController.addItem(
+                            product: product,
+                            quantity: 1,
+                            size: 'Default',
+                          );
                         },
 
                         // WISHLIST
                         onToggleFavorite: () {
-                          controller.toggleFavorite(productId);
+                          controller.toggleFavorite(product.id);
                         },
                       );
                     });

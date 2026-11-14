@@ -1,24 +1,26 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:e_commerce/app/modules/home/controllers/home_controller.dart';
+import '../../../data/models/product_model.dart';
+import '../../cart/controllers/cart_controller.dart';
+import '../../home/controllers/home_controller.dart';
 
 class DetailController extends GetxController {
   late HomeController homeController;
 
-  // Data produk
-  final product = <String, dynamic>{}.obs;
+  final CartController cartController = Get.find<CartController>();
 
-  // State quantity
+  final Rxn<ProductModel> product = Rxn<ProductModel>();
+
+  // QUANTITY
   final quantity = 1.obs;
 
-  // State ukuran
+  // SELECTED SIZE
   final selectedSize = '42'.obs;
 
-  // State wishlist
+  // FAVORITE
   final isFavorite = false.obs;
 
-  // Pilihan ukuran sepatu
+  // AVAILABLE SIZES
   final availableSizes = <String>['39', '40', '41', '42', '43', '44', '45'];
 
   @override
@@ -30,58 +32,56 @@ class DetailController extends GetxController {
     final arguments = Get.arguments;
 
     if (arguments is Map) {
-      product.assignAll(Map<String, dynamic>.from(arguments));
+      final productData = ProductModel.fromJson(
+        Map<String, dynamic>.from(arguments),
+      );
 
-      final productId = product['id'].toString();
+      product.value = productData;
 
-      isFavorite.value = homeController.isFavorite(productId);
+      isFavorite.value = homeController.isFavorite(productData.id);
     }
   }
 
-  // Menambah quantity
+  // INCREASE QUANTITY
   void incrementQuantity() {
     quantity.value++;
   }
 
-  // Mengurangi quantity
+  // DECREASE QUANTITY
   void decrementQuantity() {
     if (quantity.value > 1) {
       quantity.value--;
     }
   }
 
-  // Mengubah ukuran
+  // CHANGE SIZE
   void changeSize(String size) {
     selectedSize.value = size;
   }
 
-  // Toggle wishlist
+  // TOGGLE FAVORITE
   void toggleFavorite() {
-    final productId = product['id']?.toString() ?? '';
+    final currentProduct = product.value;
 
-    if (productId.isEmpty) return;
+    if (currentProduct == null) return;
 
-    homeController.toggleFavorite(productId);
+    homeController.toggleFavorite(currentProduct.id);
 
-    isFavorite.value = homeController.isFavorite(productId);
+    isFavorite.value = homeController.isFavorite(currentProduct.id);
   }
 
-  // Menambahkan produk sesuai quantity ke keranjang
+  // ADD TO CART
   void addToCart() {
-    if (product.isEmpty) return;
+    final currentProduct = product.value;
 
-    homeController.cartCount.value += quantity.value;
+    if (currentProduct == null) return;
 
-    Get.snackbar(
-      'Keranjang Diperbarui',
-      '${product['name']} (${quantity.value} item) berhasil ditambahkan!',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: const Color(0xFF10B981).withValues(alpha: 0.9),
-      colorText: Colors.white,
-      margin: const EdgeInsets.all(16),
-      borderRadius: 12,
-      duration: const Duration(seconds: 2),
-      icon: const Icon(Icons.shopping_bag_outlined, color: Colors.white),
+    cartController.addItem(
+      product: currentProduct,
+      quantity: quantity.value,
+      size: selectedSize.value,
     );
+
+    quantity.value = 1;
   }
 }

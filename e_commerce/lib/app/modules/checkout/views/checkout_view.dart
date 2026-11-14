@@ -25,7 +25,6 @@ class CheckoutView extends GetView<CheckoutController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Indikator Alur Pemesanan
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -48,13 +47,14 @@ class CheckoutView extends GetView<CheckoutController> {
             ),
             const SizedBox(height: 20),
 
-            // Form Alamat Pengiriman
             Text(
               'Alamat Pengiriman',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.lightTextPrimary,
               ),
             ),
             const SizedBox(height: 12),
@@ -79,50 +79,62 @@ class CheckoutView extends GetView<CheckoutController> {
               maxLines: 3,
               decoration: const InputDecoration(
                 labelText: 'Alamat Lengkap Rumah',
-                hintText: 'Nama jalan, nomor rumah, RT/RW, kelurahan, kecamatan, kota/kabupaten',
+                hintText:
+                    'Nama jalan, nomor rumah, RT/RW, kelurahan, kecamatan, kota/kabupaten',
                 prefixIcon: Icon(Icons.location_on_outlined),
               ),
             ),
             const SizedBox(height: 24),
 
-            // Pilihan Metode Pembayaran
             Text(
               'Metode Pembayaran',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.lightTextPrimary,
               ),
             ),
             const SizedBox(height: 12),
+
             Obx(
-              () => Column(
-                children: [
-                  _buildPaymentOption(
-                    index: 0,
-                    title: 'COD (Bayar di Tempat)',
-                    subtitle: 'Bayar tunai kepada kurir saat sneakers sampai di rumah',
-                    icon: Icons.local_shipping_outlined,
-                    selectedIndex: selectedPaymentMethod.value,
-                    onTap: () => selectedPaymentMethod.value = 0,
-                    isDark: isDark,
-                  ),
-                  const SizedBox(height: 10),
-                  _buildPaymentOption(
-                    index: 1,
-                    title: 'Transfer Bank (BCA / Mandiri)',
-                    subtitle: 'Verifikasi pesanan otomatis via Virtual Account',
-                    icon: Icons.account_balance_outlined,
-                    selectedIndex: selectedPaymentMethod.value,
-                    onTap: () => selectedPaymentMethod.value = 1,
-                    isDark: isDark,
-                  ),
-                ],
+              () => RadioGroup<int>(
+                groupValue: selectedPaymentMethod.value,
+                onChanged: (int? value) {
+                  if (value != null) {
+                    selectedPaymentMethod.value = value;
+                  }
+                },
+                child: Column(
+                  children: [
+                    _buildPaymentOption(
+                      index: 0,
+                      title: 'COD (Bayar di Tempat)',
+                      subtitle:
+                          'Bayar tunai kepada kurir saat sneakers sampai di rumah',
+                      icon: Icons.local_shipping_outlined,
+                      selectedIndex: selectedPaymentMethod.value,
+                      onTap: () => selectedPaymentMethod.value = 0,
+                      isDark: isDark,
+                    ),
+                    const SizedBox(height: 10),
+                    _buildPaymentOption(
+                      index: 1,
+                      title: 'Transfer Bank (BCA / Mandiri)',
+                      subtitle:
+                          'Verifikasi pesanan otomatis via Virtual Account',
+                      icon: Icons.account_balance_outlined,
+                      selectedIndex: selectedPaymentMethod.value,
+                      onTap: () => selectedPaymentMethod.value = 1,
+                      isDark: isDark,
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 24),
 
-            // Ringkasan Biaya Belanja
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -140,15 +152,31 @@ class CheckoutView extends GetView<CheckoutController> {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
-                      color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.lightTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _buildPriceRow('Total Harga Barang (2 item)', 'Rp 5.398.000', isDark),
+                  _buildPriceRow(
+                    'Total Harga Barang (2 item)',
+                    'Rp 5.398.000',
+                    isDark,
+                  ),
                   const SizedBox(height: 6),
-                  _buildPriceRow('Diskon Promosi', '- Rp 150.000', isDark, isDiscount: true),
+                  _buildPriceRow(
+                    'Diskon Promosi',
+                    '- Rp 150.000',
+                    isDark,
+                    isDiscount: true,
+                  ),
                   const SizedBox(height: 6),
-                  _buildPriceRow('Ongkos Kirim', 'GRATIS', isDark, isFree: true),
+                  _buildPriceRow(
+                    'Ongkos Kirim',
+                    'GRATIS',
+                    isDark,
+                    isFree: true,
+                  ),
                   const Divider(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -158,7 +186,9 @@ class CheckoutView extends GetView<CheckoutController> {
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                          color: isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.lightTextPrimary,
                         ),
                       ),
                       const Text(
@@ -197,7 +227,10 @@ class CheckoutView extends GetView<CheckoutController> {
             onPressed: () {
               Get.defaultDialog(
                 title: 'Pesanan Berhasil! 🎉',
-                titleStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                titleStyle: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
                 middleText:
                     'Terima kasih! Pesanan sneakers impianmu sedang diproses dan tersimpan ke cloud.',
                 textConfirm: 'Lihat Riwayat Pesanan',
@@ -222,7 +255,9 @@ class CheckoutView extends GetView<CheckoutController> {
           width: 28,
           height: 28,
           decoration: BoxDecoration(
-            color: isActive ? AppColors.primary : (isDark ? AppColors.darkBorder : Colors.grey.shade300),
+            color: isActive
+                ? AppColors.primary
+                : (isDark ? AppColors.darkBorder : Colors.grey.shade300),
             shape: BoxShape.circle,
           ),
           child: Center(
@@ -244,7 +279,9 @@ class CheckoutView extends GetView<CheckoutController> {
             fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
             color: isActive
                 ? AppColors.primary
-                : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+                : (isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.lightTextSecondary),
           ),
         ),
       ],
@@ -270,6 +307,7 @@ class CheckoutView extends GetView<CheckoutController> {
     required bool isDark,
   }) {
     final isSelected = selectedIndex == index;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
@@ -279,7 +317,9 @@ class CheckoutView extends GetView<CheckoutController> {
           color: isDark ? AppColors.darkSurfaceCard : Colors.white,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isSelected ? AppColors.primary : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
+            color: isSelected
+                ? AppColors.primary
+                : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -288,7 +328,9 @@ class CheckoutView extends GetView<CheckoutController> {
             Icon(
               icon,
               size: 28,
-              color: isSelected ? AppColors.primary : (isDark ? Colors.white70 : Colors.black54),
+              color: isSelected
+                  ? AppColors.primary
+                  : (isDark ? Colors.white70 : Colors.black54),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -300,7 +342,9 @@ class CheckoutView extends GetView<CheckoutController> {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.lightTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -308,31 +352,36 @@ class CheckoutView extends GetView<CheckoutController> {
                     subtitle,
                     style: TextStyle(
                       fontSize: 11,
-                      color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.lightTextSecondary,
                     ),
                   ),
                 ],
               ),
             ),
-            Radio<int>(
-              value: index,
-              groupValue: selectedIndex,
-              onChanged: (_) => onTap(),
-              activeColor: AppColors.primary,
-            ),
+            Radio<int>(value: index, activeColor: AppColors.primary),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPriceRow(String label, String value, bool isDark,
-      {bool isDiscount = false, bool isFree = false}) {
+  Widget _buildPriceRow(
+    String label,
+    String value,
+    bool isDark, {
+    bool isDiscount = false,
+    bool isFree = false,
+  }) {
     Color textColor;
+
     if (isDiscount || isFree) {
       textColor = AppColors.success;
     } else {
-      textColor = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+      textColor = isDark
+          ? AppColors.darkTextPrimary
+          : AppColors.lightTextPrimary;
     }
 
     return Row(
@@ -342,14 +391,18 @@ class CheckoutView extends GetView<CheckoutController> {
           label,
           style: TextStyle(
             fontSize: 13,
-            color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.lightTextSecondary,
           ),
         ),
         Text(
           value,
           style: TextStyle(
             fontSize: 13,
-            fontWeight: isDiscount || isFree ? FontWeight.bold : FontWeight.w500,
+            fontWeight: isDiscount || isFree
+                ? FontWeight.bold
+                : FontWeight.w500,
             color: textColor,
           ),
         ),
