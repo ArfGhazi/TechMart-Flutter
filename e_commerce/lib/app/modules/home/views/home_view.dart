@@ -12,6 +12,7 @@ class HomeView extends GetView<HomeController> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
+      // APP BAR
       appBar: AppBar(
         elevation: 0,
         title: Row(
@@ -32,6 +33,7 @@ class HomeView extends GetView<HomeController> {
           ],
         ),
         actions: [
+          // THEME BUTTON
           IconButton(
             onPressed: () {
               Get.changeThemeMode(
@@ -40,21 +42,53 @@ class HomeView extends GetView<HomeController> {
             },
             icon: Icon(Get.isDarkMode ? Icons.light_mode : Icons.dark_mode),
           ),
-          IconButton(
-            onPressed: () {
-              Get.snackbar('Shopping Cart', 'Your cart is currently empty.');
-            },
-            icon: const Icon(Icons.shopping_bag_outlined),
-          ),
+
+          // CART BUTTON
+          Obx(() {
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                IconButton(
+                  onPressed: () {
+                    Get.snackbar(
+                      'Shopping Cart',
+                      'You have ${controller.cartCount.value} items in your cart.',
+                    );
+                  },
+                  icon: const Icon(Icons.shopping_bag_outlined),
+                ),
+                if (controller.cartCount.value > 0)
+                  Positioned(
+                    right: 5,
+                    top: 5,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '${controller.cartCount.value}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          }),
         ],
       ),
 
+      // BODY
       body: RefreshIndicator(
         onRefresh: controller.fetchProducts,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16),
-
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -142,24 +176,25 @@ class HomeView extends GetView<HomeController> {
 
               // CATEGORY FILTER
               Obx(() {
-                final selected = controller.selectedCategory.value;
-
                 return SizedBox(
                   height: 42,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: controller.categories.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    separatorBuilder: (_, index) => const SizedBox(width: 8),
                     itemBuilder: (context, index) {
                       final category = controller.categories[index];
 
+                      final selected =
+                          controller.selectedCategory.value == category;
+
                       return ChoiceChip(
                         label: Text(category),
-                        selected: selected == category,
+                        selected: selected,
                         selectedColor: const Color(0xFF4F46E5),
                         showCheckmark: false,
                         labelStyle: TextStyle(
-                          color: selected == category ? Colors.white : null,
+                          color: selected ? Colors.white : null,
                         ),
                         onSelected: (_) {
                           controller.selectCategory(category);
@@ -180,7 +215,7 @@ class HomeView extends GetView<HomeController> {
 
               const SizedBox(height: 16),
 
-              // PRODUCT LIST
+              // PRODUCT GRID
               Obx(() {
                 if (controller.isLoading.value) {
                   return const Center(
@@ -211,9 +246,9 @@ class HomeView extends GetView<HomeController> {
                   );
                 }
 
-                final items = controller.filteredProducts;
+                final products = controller.filteredProducts;
 
-                if (items.isEmpty) {
+                if (products.isEmpty) {
                   return const Center(
                     child: Padding(
                       padding: EdgeInsets.all(30),
@@ -225,7 +260,7 @@ class HomeView extends GetView<HomeController> {
                 return GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: items.length,
+                  itemCount: products.length,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     childAspectRatio: 0.66,
@@ -233,29 +268,53 @@ class HomeView extends GetView<HomeController> {
                     mainAxisSpacing: 12,
                   ),
                   itemBuilder: (context, index) {
-                    final product = items[index];
+                    final product = products[index];
 
-                    return ProductCard(
-                      title: product['title'].toString(),
-                      category: product['category'].toString(),
-                      price:
-                          '\$${(product['price'] as num).toStringAsFixed(2)}',
-                      rating: (product['rating'] as num).toDouble(),
-                      imageUrl: product['thumbnail'].toString(),
-                      onTap: () {
-                        Get.snackbar(
-                          product['title'].toString(),
-                          product['description'].toString(),
-                        );
-                      },
-                      onAddToCart: () {
-                        Get.snackbar(
-                          'Added to Cart',
-                          '${product['title']} added to cart.',
-                          snackPosition: SnackPosition.BOTTOM,
-                        );
-                      },
-                    );
+                    // READ PRODUCT DATA
+                    final productId = product['id']?.toString() ?? '';
+
+                    final productName =
+                        product['name']?.toString() ?? 'Unknown Product';
+
+                    final productCategory =
+                        product['category']?.toString() ?? 'Other';
+
+                    final productPrice = (product['price'] as num?) ?? 0;
+
+                    final productRating = (product['rating'] as num?) ?? 0;
+
+                    final productImage = product['imageUrl']?.toString() ?? '';
+
+                    // DEBUG
+                    debugPrint('PRODUCT: $product');
+                    debugPrint('PRODUCT NAME: $productName');
+                    debugPrint('PRODUCT IMAGE: $productImage');
+
+                    return Obx(() {
+                      return ProductCard(
+                        title: productName,
+                        category: productCategory,
+                        price: '\$${productPrice.toStringAsFixed(2)}',
+                        rating: productRating.toDouble(),
+                        imageUrl: productImage,
+                        isFavorite: controller.isFavorite(productId),
+
+                        // OPEN DETAIL
+                        onTap: () {
+                          controller.openDetail(product);
+                        },
+
+                        // ADD TO CART
+                        onAddToCart: () {
+                          controller.addToCart(product);
+                        },
+
+                        // WISHLIST
+                        onToggleFavorite: () {
+                          controller.toggleFavorite(productId);
+                        },
+                      );
+                    });
                   },
                 );
               }),

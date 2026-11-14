@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:e_commerce/app/core/theme/app_colors.dart';
 
-/// Komponen Kartu Produk untuk Katalog Beranda
 class ProductCard extends StatelessWidget {
   final String title;
   final String category;
   final String price;
   final double rating;
   final String imageUrl;
+  final bool isFavorite;
+
   final VoidCallback? onAddToCart;
   final VoidCallback? onTap;
+  final VoidCallback? onToggleFavorite;
 
   const ProductCard({
     super.key,
@@ -18,8 +19,10 @@ class ProductCard extends StatelessWidget {
     required this.price,
     required this.rating,
     required this.imageUrl,
+    this.isFavorite = false,
     this.onAddToCart,
     this.onTap,
+    this.onToggleFavorite,
   });
 
   @override
@@ -33,38 +36,45 @@ class ProductCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Gambar Produk dengan Badge Kategori
+            // PRODUCT IMAGE
             Expanded(
               flex: 5,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
                   Container(
-                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                    child: Image.network(
-                      imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Center(
-                        child: Icon(
-                          Icons.image_not_supported_outlined,
-                          size: 40,
-                          color: isDark ? AppColors.darkTextMuted : AppColors.lightTextMuted,
-                        ),
-                      ),
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return const Center(
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        );
-                      },
-                    ),
+                    color: isDark
+                        ? const Color(0xFF1E293B)
+                        : const Color(0xFFF1F5F9),
+                    child: imageUrl.isEmpty
+                        ? _imagePlaceholder()
+                        : Image.network(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return _imagePlaceholder();
+                            },
+                            loadingBuilder: (context, child, progress) {
+                              if (progress == null) return child;
+
+                              return const Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              );
+                            },
+                          ),
                   ),
-                  // Badge Kategori
+
+                  // CATEGORY BADGE
                   Positioned(
                     top: 8,
                     left: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.black.withAlpha(160),
                         borderRadius: BorderRadius.circular(6),
@@ -79,11 +89,27 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
                   ),
+
+                  // FAVORITE BUTTON
+                  Positioned(
+                    top: 5,
+                    right: 5,
+                    child: IconButton(
+                      onPressed: onToggleFavorite,
+                      icon: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: isFavorite ? Colors.red : Colors.white,
+                      ),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.black.withAlpha(100),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
 
-            // Informasi Produk (Judul, Harga, Rating, Tombol Beli)
+            // PRODUCT INFORMATION
             Expanded(
               flex: 5,
               child: Padding(
@@ -102,21 +128,26 @@ class ProductCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF1E293B),
                             height: 1.2,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 5),
                         Row(
                           children: [
-                            const Icon(Icons.star_rounded, size: 16, color: AppColors.accent),
+                            const Icon(
+                              Icons.star_rounded,
+                              size: 16,
+                              color: Colors.amber,
+                            ),
                             const SizedBox(width: 3),
                             Text(
                               rating.toStringAsFixed(1),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
-                                color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
                               ),
                             ),
                           ],
@@ -124,30 +155,28 @@ class ProductCard extends StatelessWidget {
                       ],
                     ),
 
-                    // Harga & Tombol Tambah ke Keranjang
+                    // PRICE AND CART BUTTON
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(
                           child: Text(
                             price,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w800,
-                              color: AppColors.primary,
+                              color: Color(0xFF4F46E5),
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         InkWell(
                           onTap: onAddToCart,
                           borderRadius: BorderRadius.circular(8),
                           child: Container(
-                            padding: const EdgeInsets.all(6),
+                            padding: const EdgeInsets.all(7),
                             decoration: BoxDecoration(
-                              color: AppColors.primary,
+                              color: const Color(0xFF4F46E5),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Icon(
@@ -165,6 +194,16 @@ class ProductCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _imagePlaceholder() {
+    return const Center(
+      child: Icon(
+        Icons.image_not_supported_outlined,
+        size: 40,
+        color: Colors.grey,
       ),
     );
   }
