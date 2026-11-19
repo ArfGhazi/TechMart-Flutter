@@ -11,8 +11,6 @@ class HomeView extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-
-      // APP BAR
       appBar: AppBar(
         elevation: 0,
         title: Row(
@@ -33,7 +31,6 @@ class HomeView extends GetView<HomeController> {
           ],
         ),
         actions: [
-          // THEME BUTTON
           IconButton(
             onPressed: () {
               Get.changeThemeMode(
@@ -42,8 +39,6 @@ class HomeView extends GetView<HomeController> {
             },
             icon: Icon(Get.isDarkMode ? Icons.light_mode : Icons.dark_mode),
           ),
-
-          // WISHLIST BUTTON
           Obx(() {
             final wishlistCount = controller.wishlistCount;
 
@@ -52,36 +47,18 @@ class HomeView extends GetView<HomeController> {
               children: [
                 IconButton(
                   tooltip: 'Wishlist',
-                  onPressed: () {
-                    Get.toNamed('/wishlist');
-                  },
+                  onPressed: () => Get.toNamed('/wishlist'),
                   icon: const Icon(Icons.favorite_border_rounded),
                 ),
                 if (wishlistCount > 0)
                   Positioned(
                     right: 5,
                     top: 5,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        '$wishlistCount',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                    child: _buildCountBadge(wishlistCount),
                   ),
               ],
             );
           }),
-
-          // CART BUTTON
           Obx(() {
             final cartCount = controller.cartCount;
 
@@ -89,30 +66,14 @@ class HomeView extends GetView<HomeController> {
               alignment: Alignment.center,
               children: [
                 IconButton(
-                  onPressed: () {
-                    Get.toNamed('/cart');
-                  },
+                  onPressed: () => Get.toNamed('/cart'),
                   icon: const Icon(Icons.shopping_bag_outlined),
                 ),
                 if (cartCount > 0)
                   Positioned(
                     right: 5,
                     top: 5,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        '$cartCount',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                    child: _buildCountBadge(cartCount),
                   ),
               ],
             );
@@ -133,7 +94,7 @@ class HomeView extends GetView<HomeController> {
               TextField(
                 onChanged: controller.updateSearch,
                 decoration: InputDecoration(
-                  hintText: 'Search gadgets...',
+                  hintText: 'Search shoes...',
                   prefixIcon: const Icon(Icons.search),
                   filled: true,
                   border: OutlineInputBorder(
@@ -183,7 +144,7 @@ class HomeView extends GetView<HomeController> {
                           ),
                           SizedBox(height: 8),
                           Text(
-                            'Discover the latest gadgets.',
+                            'Discover the latest sneakers.',
                             style: TextStyle(
                               color: Colors.white70,
                               fontSize: 12,
@@ -193,7 +154,7 @@ class HomeView extends GetView<HomeController> {
                       ),
                     ),
                     const Icon(
-                      Icons.devices_other,
+                      Icons.directions_run_rounded,
                       color: Colors.white70,
                       size: 70,
                     ),
@@ -220,12 +181,9 @@ class HomeView extends GetView<HomeController> {
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: controller.categories.length,
-                    separatorBuilder: (_, index) {
-                      return const SizedBox(width: 8);
-                    },
+                    separatorBuilder: (_, index) => const SizedBox(width: 8),
                     itemBuilder: (context, index) {
                       final category = controller.categories[index];
-
                       final selected = selectedCategory == category;
 
                       return ChoiceChip(
@@ -257,7 +215,7 @@ class HomeView extends GetView<HomeController> {
 
               // PRODUCT GRID
               Obx(() {
-                if (controller.isLoading.value) {
+                if (controller.isLoading.value && controller.products.isEmpty) {
                   return const Center(
                     child: Padding(
                       padding: EdgeInsets.all(40),
@@ -266,22 +224,27 @@ class HomeView extends GetView<HomeController> {
                   );
                 }
 
-                if (controller.errorMessage.value.isNotEmpty) {
+                if (controller.errorMessage.value.isNotEmpty &&
+                    controller.products.isEmpty) {
                   return Center(
-                    child: Column(
-                      children: [
-                        const Icon(Icons.wifi_off, size: 45),
-                        const SizedBox(height: 12),
-                        Text(
-                          controller.errorMessage.value,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 12),
-                        ElevatedButton(
-                          onPressed: controller.fetchProducts,
-                          child: const Text('Try Again'),
-                        ),
-                      ],
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        children: [
+                          const Icon(Icons.wifi_off_rounded, size: 45),
+                          const SizedBox(height: 12),
+                          Text(
+                            controller.errorMessage.value,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 12),
+                          ElevatedButton.icon(
+                            onPressed: controller.fetchProducts,
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('Try Again'),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 }
@@ -297,55 +260,81 @@ class HomeView extends GetView<HomeController> {
                   );
                 }
 
-                return GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: products.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.66,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                  ),
-                  itemBuilder: (context, index) {
-                    final product = products[index];
+                return Column(
+                  children: [
+                    if (controller.isLoading.value)
+                      const LinearProgressIndicator(),
 
-                    return Obx(() {
-                      final isFavorite = controller.isFavorite(product.id);
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: products.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.66,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                          ),
+                      itemBuilder: (context, index) {
+                        final product = products[index];
 
-                      return ProductCard(
-                        title: product.title,
-                        category: product.category,
-                        price: '\$${product.price.toStringAsFixed(2)}',
-                        rating: product.rating,
-                        imageUrl: product.imageUrl,
-                        isFavorite: isFavorite,
+                        return Obx(() {
+                          final isFavorite = controller.isFavorite(product.id);
 
-                        // OPEN DETAIL
-                        onTap: () {
-                          controller.openDetail(product);
-                        },
+                          return ProductCard(
+                            title: product.title,
+                            category: product.category,
+                            price: product.formattedPrice,
+                            rating: product.rating,
+                            imageUrl: product.imageUrl,
+                            isFavorite: isFavorite,
 
-                        // ADD TO CART
-                        onAddToCart: () {
-                          controller.cartController.addItem(
-                            product: product,
-                            quantity: 1,
-                            size: 'Default',
+                            // OPEN DETAIL
+                            onTap: () {
+                              controller.openDetail(product);
+                            },
+
+                            // ADD TO CART
+                            onAddToCart: () {
+                              controller.cartController.addItem(
+                                product: product,
+                                quantity: 1,
+                                size: 'Default',
+                              );
+                            },
+
+                            // WISHLIST
+                            onToggleFavorite: () {
+                              controller.toggleFavorite(product.id);
+                            },
                           );
-                        },
-
-                        // WISHLIST
-                        onToggleFavorite: () {
-                          controller.toggleFavorite(product.id);
-                        },
-                      );
-                    });
-                  },
+                        });
+                      },
+                    ),
+                  ],
                 );
               }),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCountBadge(int count) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: const BoxDecoration(
+        color: Colors.red,
+        shape: BoxShape.circle,
+      ),
+      child: Text(
+        '$count',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
