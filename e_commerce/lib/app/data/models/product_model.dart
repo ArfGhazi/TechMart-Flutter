@@ -1,15 +1,23 @@
 import 'package:intl/intl.dart';
 
-/// Model data produk sepatu (Type-Safe Entity).
+/// Model data produk sepatu yang mendukung Hive CE.
 class ProductModel {
   final String id;
+
   final String title;
+
   final String category;
+
   final int price;
+
   final double rating;
+
   final int reviewCount;
+
   final String imageUrl;
+
   final String description;
+
   final bool isFavorite;
 
   const ProductModel({
@@ -76,7 +84,6 @@ class ProductModel {
         ? '${rawCategory[0].toUpperCase()}${rawCategory.substring(1)}'
         : 'General';
 
-    // Konversi harga USD ke Rupiah jika nilainya di bawah 1000.
     final rawPrice = (json['price'] as num?)?.toInt() ?? 150000;
     final price = rawPrice < 1000 ? rawPrice * 15000 : rawPrice;
 

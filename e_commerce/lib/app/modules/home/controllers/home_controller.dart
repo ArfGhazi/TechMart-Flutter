@@ -73,45 +73,42 @@ class HomeController extends GetxController {
         case Success<List<ProductModel>, String>(:final data):
           products.assignAll(data);
 
-          Get.snackbar(
-            'Katalog Berhasil Diperbarui',
-            'Berhasil mengunduh ${data.length} sepatu terbaru dari server!',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: const Color(0xFF10B981),
-            colorText: Colors.white,
-            duration: const Duration(seconds: 2),
-            icon: const Icon(Icons.cloud_done_rounded, color: Colors.white),
-          );
-
-        case Failure<List<ProductModel>, String>(:final error):
-          errorMessage.value = error;
-
-          if (products.isNotEmpty) {
+          if (_productRepository.isOffline) {
             Get.snackbar(
               'Mode Offline',
-              'Koneksi ke server terputus. Menampilkan katalog sebelumnya.',
+              'Koneksi server terputus. Menampilkan ${data.length} produk dari penyimpanan lokal.',
               snackPosition: SnackPosition.BOTTOM,
               backgroundColor: const Color(0xFFEF4444),
               colorText: Colors.white,
               duration: const Duration(seconds: 3),
               icon: const Icon(Icons.cloud_off_rounded, color: Colors.white),
             );
+          } else {
+            Get.snackbar(
+              'Katalog Berhasil Diperbarui',
+              'Berhasil mengunduh ${data.length} sepatu terbaru dari server!',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: const Color(0xFF10B981),
+              colorText: Colors.white,
+              duration: const Duration(seconds: 2),
+              icon: const Icon(Icons.cloud_done_rounded, color: Colors.white),
+            );
           }
+
+        case Failure<List<ProductModel>, String>(:final error):
+          errorMessage.value = error;
+
+          Get.snackbar(
+            'Gagal Memuat Produk',
+            'Tidak dapat mengambil produk dari server maupun penyimpanan lokal.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: const Color(0xFFEF4444),
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+          );
       }
     } catch (error) {
       errorMessage.value = error.toString();
-
-      if (products.isNotEmpty) {
-        Get.snackbar(
-          'Mode Offline',
-          'Koneksi ke server terputus. Menampilkan katalog sebelumnya.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: const Color(0xFFEF4444),
-          colorText: Colors.white,
-          duration: const Duration(seconds: 3),
-          icon: const Icon(Icons.cloud_off_rounded, color: Colors.white),
-        );
-      }
     } finally {
       isLoading.value = false;
     }

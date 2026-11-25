@@ -51,32 +51,11 @@ class WishlistView extends GetView<WishlistController> {
             return IconButton(
               tooltip: 'Hapus semua wishlist',
               icon: const Icon(Icons.delete_sweep_rounded),
-              onPressed: () {
-                Get.dialog(
-                  AlertDialog(
-                    title: const Text('Hapus Semua Wishlist?'),
-                    content: const Text('Semua produk favorit akan dihapus.'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Get.back(),
-                        child: const Text('Batal'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          controller.clearWishlist();
-                          Get.back();
-                        },
-                        child: const Text('Hapus'),
-                      ),
-                    ],
-                  ),
-                );
-              },
+              onPressed: controller.clearWishlist,
             );
           }),
         ],
       ),
-
       body: Obx(() {
         if (controller.items.isEmpty) {
           return Center(
@@ -156,9 +135,7 @@ class WishlistView extends GetView<WishlistController> {
                       ),
                     ),
                   ),
-
                   const SizedBox(width: 14),
-
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,9 +167,7 @@ class WishlistView extends GetView<WishlistController> {
                       ],
                     ),
                   ),
-
                   const SizedBox(width: 8),
-
                   Column(
                     children: [
                       IconButton(
@@ -205,7 +180,6 @@ class WishlistView extends GetView<WishlistController> {
                           controller.removeItem(product.id);
                         },
                       ),
-
                       InkWell(
                         borderRadius: BorderRadius.circular(8),
                         onTap: () {
