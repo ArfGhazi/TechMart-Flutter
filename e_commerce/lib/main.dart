@@ -3,10 +3,16 @@ import 'package:get/get.dart';
 
 import 'app/bindings/initial_binding.dart';
 import 'app/core/theme/app_theme.dart';
+import 'app/data/local/storage_service.dart';
 import 'app/routes/app_pages.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final storageService = await Get.putAsync(
+    () => StorageService().init(),
+    permanent: true,
+  );
 
   runApp(
     GetMaterialApp(
@@ -14,7 +20,7 @@ void main() {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.light,
+      themeMode: storageService.themeMode,
       initialRoute: AppPages.INITIAL,
       initialBinding: InitialBinding(),
       getPages: AppPages.routes,

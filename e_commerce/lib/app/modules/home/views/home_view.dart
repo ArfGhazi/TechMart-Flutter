@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'package:e_commerce/app/data/local/storage_service.dart';
+import 'package:e_commerce/app/modules/home/widgets/product_card_shimmer.dart';
+
 import '../controllers/home_controller.dart';
 import 'components/product_card.dart';
 
@@ -33,9 +36,7 @@ class HomeView extends GetView<HomeController> {
         actions: [
           IconButton(
             onPressed: () {
-              Get.changeThemeMode(
-                Get.isDarkMode ? ThemeMode.light : ThemeMode.dark,
-              );
+              Get.find<StorageService>().toggleTheme();
             },
             icon: Icon(Get.isDarkMode ? Icons.light_mode : Icons.dark_mode),
           ),
@@ -216,12 +217,7 @@ class HomeView extends GetView<HomeController> {
               // PRODUCT GRID
               Obx(() {
                 if (controller.isLoading.value && controller.products.isEmpty) {
-                  return const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(40),
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
+                  return const ProductGridShimmer(itemCount: 4);
                 }
 
                 if (controller.errorMessage.value.isNotEmpty &&
