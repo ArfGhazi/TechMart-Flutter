@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 
 // ignore_for_file: constant_identifier_names
 
+import '../middleware/auth_middleware.dart';
 import '../modules/cart/bindings/cart_binding.dart';
 import '../modules/cart/views/cart_view.dart';
 import '../modules/checkout/bindings/checkout_binding.dart';
@@ -51,6 +52,7 @@ class AppPages {
       name: _Paths.CHECKOUT,
       page: () => const CheckoutView(),
       binding: CheckoutBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: _Paths.LOGIN,

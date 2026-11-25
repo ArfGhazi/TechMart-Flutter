@@ -3,13 +3,17 @@ import 'package:get/get.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:e_commerce/app/data/local/cart_local_datasource.dart';
 import 'package:e_commerce/app/data/local/product_local_datasource.dart';
+import 'package:e_commerce/app/data/models/cart_item_model.dart';
+import 'package:e_commerce/app/data/models/order_model.dart';
 import 'package:e_commerce/app/data/models/product_model.dart';
 import 'package:e_commerce/hive/hive_registrar.g.dart';
 
 /// Service penyimpanan data lokal terpusat.
 class StorageService extends GetxService {
   static const String _themeKey = 'is_dark_mode';
+  static const String ordersBoxName = 'orders_box';
 
   late final SharedPreferences _prefs;
 
@@ -40,12 +44,16 @@ class StorageService extends GetxService {
       await Hive.openBox<ProductModel>(
         ProductLocalDataSourceImpl.wishlistBoxName,
       );
+
+      await Hive.openBox<CartItemModel>(CartLocalDataSourceImpl.cartBoxName);
+
+      await Hive.openBox<OrderModel>(ordersBoxName);
     }
 
     return this;
   }
 
-  /// Mengubah tema, menyimpan preferensi, dan menampilkan feedback.
+  /// Mengubah tema dan menyimpan preferensi.
   Future<void> toggleTheme() async {
     _isDarkMode.value = !_isDarkMode.value;
 

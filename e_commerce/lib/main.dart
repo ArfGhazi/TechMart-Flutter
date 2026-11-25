@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import 'app/bindings/initial_binding.dart';
 import 'app/core/theme/app_theme.dart';
+import 'app/data/local/auth_service.dart';
 import 'app/data/local/product_local_datasource.dart';
 import 'app/data/local/storage_service.dart';
 import 'app/routes/app_pages.dart';
@@ -15,6 +16,9 @@ Future<void> main() async {
     () => StorageService().init(),
     permanent: true,
   );
+
+  // Inisialisasi autentikasi lokal.
+  await Get.putAsync(() => AuthService().init(), permanent: true);
 
   // Daftarkan local data source setelah Hive siap.
   Get.put<ProductLocalDataSource>(

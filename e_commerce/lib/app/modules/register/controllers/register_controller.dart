@@ -2,22 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:e_commerce/app/core/theme/app_colors.dart';
+import 'package:e_commerce/app/data/local/auth_service.dart';
 import 'package:e_commerce/app/routes/app_pages.dart';
 
 class RegisterController extends GetxController {
-  // Form validation
   final formKey = GlobalKey<FormState>();
 
-  // Text controllers
   late final TextEditingController nameController;
   late final TextEditingController emailController;
   late final TextEditingController passwordController;
   late final TextEditingController confirmPasswordController;
 
-  // Reactive states
   final isPasswordHidden = true.obs;
   final isConfirmPasswordHidden = true.obs;
   final isLoading = false.obs;
+
+  final AuthService _authService = Get.find<AuthService>();
 
   @override
   void onInit() {
@@ -35,21 +35,17 @@ class RegisterController extends GetxController {
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
-
     super.onClose();
   }
 
-  // Toggle password visibility
   void togglePasswordVisibility() {
     isPasswordHidden.value = !isPasswordHidden.value;
   }
 
-  // Toggle confirm password visibility
   void toggleConfirmPasswordVisibility() {
     isConfirmPasswordHidden.value = !isConfirmPasswordHidden.value;
   }
 
-  // Name validation
   String? validateName(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Nama wajib diisi';
@@ -62,7 +58,6 @@ class RegisterController extends GetxController {
     return null;
   }
 
-  // Email validation using Regex
   String? validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Alamat email wajib diisi';
@@ -73,14 +68,12 @@ class RegisterController extends GetxController {
     );
 
     if (!emailRegex.hasMatch(value.trim())) {
-      return 'Format email tidak valid (contoh: nama@sekolah.sch.id)';
+      return 'Format email tidak valid';
     }
 
     return null;
   }
 
-  // Password validation
-  // Minimum 6 characters and at least 1 digit
   String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Kata sandi wajib diisi';
@@ -91,13 +84,12 @@ class RegisterController extends GetxController {
     }
 
     if (!RegExp(r'[0-9]').hasMatch(value)) {
-      return 'Kata sandi harus mengandung minimal 1 angka (0-9)';
+      return 'Kata sandi harus mengandung minimal 1 angka';
     }
 
     return null;
   }
 
-  // Confirm password validation
   String? validateConfirmPassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Konfirmasi kata sandi wajib diisi';
@@ -110,7 +102,6 @@ class RegisterController extends GetxController {
     return null;
   }
 
-  // Register action
   Future<void> register() async {
     if (!formKey.currentState!.validate()) {
       return;
@@ -120,6 +111,11 @@ class RegisterController extends GetxController {
 
     try {
       await Future.delayed(const Duration(milliseconds: 1200));
+
+      await _authService.login(
+        name: nameController.text.trim(),
+        email: emailController.text.trim(),
+      );
 
       Get.snackbar(
         'Registrasi Berhasil 🎉',
@@ -133,7 +129,6 @@ class RegisterController extends GetxController {
         icon: const Icon(Icons.check_circle_outline, color: Colors.white),
       );
 
-      // Redirect langsung ke Home
       Get.offAllNamed(Routes.HOME);
     } finally {
       isLoading.value = false;

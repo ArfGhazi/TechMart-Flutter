@@ -1,18 +1,28 @@
 import 'product_model.dart';
 
 class CartItemModel {
+  final String id;
   final ProductModel product;
-  int quantity;
   final String size;
+  int quantity;
 
-  CartItemModel({required this.product, this.quantity = 1, required this.size});
-
-  String get id => '${product.id}_$size';
+  CartItemModel({
+    String? id,
+    required this.product,
+    this.quantity = 1,
+    required this.size,
+  }) : id = id ?? '${product.id}_$size';
 
   int get totalPrice => product.price * quantity;
 
-  CartItemModel copyWith({ProductModel? product, int? quantity, String? size}) {
+  CartItemModel copyWith({
+    String? id,
+    ProductModel? product,
+    int? quantity,
+    String? size,
+  }) {
     return CartItemModel(
+      id: id ?? this.id,
       product: product ?? this.product,
       quantity: quantity ?? this.quantity,
       size: size ?? this.size,

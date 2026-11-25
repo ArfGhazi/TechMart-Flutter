@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:e_commerce/app/core/theme/app_colors.dart';
+import 'package:e_commerce/app/data/local/auth_service.dart';
 import 'package:e_commerce/app/routes/app_pages.dart';
 
 class LoginController extends GetxController {
-  // Form validation
   final formKey = GlobalKey<FormState>();
 
-  // Text controllers
   late final TextEditingController emailController;
   late final TextEditingController passwordController;
 
-  // Reactive states
   final isPasswordHidden = true.obs;
   final isLoading = false.obs;
+
+  final AuthService _authService = Get.find<AuthService>();
 
   @override
   void onInit() {
@@ -28,16 +28,13 @@ class LoginController extends GetxController {
   void onClose() {
     emailController.dispose();
     passwordController.dispose();
-
     super.onClose();
   }
 
-  // Toggle password visibility
   void togglePasswordVisibility() {
     isPasswordHidden.value = !isPasswordHidden.value;
   }
 
-  // Email validation using Regex
   String? validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Alamat email wajib diisi';
@@ -48,13 +45,12 @@ class LoginController extends GetxController {
     );
 
     if (!emailRegex.hasMatch(value.trim())) {
-      return 'Format email tidak valid (contoh: nama@sekolah.sch.id)';
+      return 'Format email tidak valid';
     }
 
     return null;
   }
 
-  // Password validation: minimum 6 characters and at least 1 digit
   String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Kata sandi wajib diisi';
@@ -65,13 +61,12 @@ class LoginController extends GetxController {
     }
 
     if (!RegExp(r'[0-9]').hasMatch(value)) {
-      return 'Kata sandi harus mengandung minimal 1 angka (0-9)';
+      return 'Kata sandi harus mengandung minimal 1 angka';
     }
 
     return null;
   }
 
-  // Login action
   Future<void> login() async {
     if (!formKey.currentState!.validate()) {
       return;
@@ -81,6 +76,10 @@ class LoginController extends GetxController {
 
     try {
       await Future.delayed(const Duration(milliseconds: 1200));
+
+      final email = emailController.text.trim();
+
+      await _authService.login(name: email.split('@').first, email: email);
 
       Get.snackbar(
         'Login Berhasil 🎉',
@@ -94,7 +93,11 @@ class LoginController extends GetxController {
         icon: const Icon(Icons.check_circle_outline, color: Colors.white),
       );
 
-      Get.offAllNamed(Routes.HOME);
+      final destination = Get.arguments is String
+          ? Get.arguments as String
+          : Routes.HOME;
+
+      Get.offAllNamed(destination);
     } finally {
       isLoading.value = false;
     }

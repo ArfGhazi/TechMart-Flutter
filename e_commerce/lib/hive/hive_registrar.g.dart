@@ -7,12 +7,16 @@ import 'package:e_commerce/hive/hive_adapters.dart';
 
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
+    registerAdapter(CartItemModelAdapter());
+    registerAdapter(OrderModelAdapter());
     registerAdapter(ProductModelAdapter());
   }
 }
 
 extension IsolatedHiveRegistrar on IsolatedHiveInterface {
   void registerAdapters() {
+    registerAdapter(CartItemModelAdapter());
+    registerAdapter(OrderModelAdapter());
     registerAdapter(ProductModelAdapter());
   }
 }
